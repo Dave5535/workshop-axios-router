@@ -1,5 +1,6 @@
 import React from 'react'
 import { BrowserRouter as Router, Switch, Route, Link, useHistory, useParams, useLocation, Redirect } from "react-router-dom";
+import CrudDemo from './CrudDemo';
 
  const DemoRouter = () => {
   
@@ -13,6 +14,8 @@ import { BrowserRouter as Router, Switch, Route, Link, useHistory, useParams, us
                 <Route exact path="/person" component={Person}/>
                 <Route exact path="/about" component={About}/>
                
+                <Route exact path="/crud" component={CrudDemo}/>
+                
                
                 <Route exact path="" component={NotFound}/>
 
@@ -29,16 +32,19 @@ const Header = () => {
 <div className="container-fluid">
 <ul className="nav me-auto">
   <li className="nav-item">
-    <a className="navbar-brand text-white" href="/">React</a>
+    <Link className="navbar-brand text-white" to="/">React</Link>
   </li>
   <li className="nav-item">
-    <a className="nav-link text-white" href="/home">Home</a>
+    <Link className="nav-link text-white" to="/home">Home</Link>
   </li>
   <li className="nav-item">
-    <a className="nav-link text-white" href="/person">Person</a>
+    <Link className="nav-link text-white" to="/person">Person</Link>
   </li>
   <li className="nav-item">
-    <a className="nav-link text-white" href="/about">About us</a>
+    <Link className="nav-link text-white" to="/about">About us</Link>
+  </li>
+  <li className="nav-item">
+    <Link className="nav-link text-white" to="/crud">CRUD</Link>
   </li>
 </ul>
       </div>
@@ -83,6 +89,5 @@ const Header = () => {
             </div>
             );
     }
-
  
 export default DemoRouter;
