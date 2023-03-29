@@ -1,17 +1,22 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom';
+import axios from 'axios';
+import AlertMessage from './AlertMessage';
+import {useForm} from 'react-hook-form';
 
 const CrudDemo = () => {
 
   // initializ js variables 
-  const persons = [
-    { id: 1, firstName: 'Test', lastName: 'Testing', email: "TestEmail.com", title: "test" },
-    { id: 2, firstName: 'David', lastName: 'Svantesson', email: "email.com", title: "programer" },
-    { id: 3, firstName: 'Bengt', lastName: 'Bengtsson', email: "bengt@email.com", title: "?" },
-    { id: 4, firstName: 'Mario', lastName: 'Mariolastname', email: "Nintendo", titel: "Game character" }];
+  const persons = [];
 
   // define state variables 
 
+  const API_URL = 'http://localhost:8080/api/v1/person';
+  const [selectedId, setSelectedId] = useState(null);
+// Alert
+  const [alert, setAlert] = useState({ type: '', message: '' });
+
+// person
   const [personList, setPersonList] = useState(persons);
   const [showDetails, setShowDetails] = useState(false);
   const [person, setPerson] = useState({
@@ -21,8 +26,24 @@ const CrudDemo = () => {
     email: "",
     title: "",
   });
+// useForm
+  const {register, handleSubmit, formState: {errors}} = useForm();
+// useEfect
+  const [reload, setReload] = useState(false);
 
+// useForm
 
+  //useEfect 
+  useEffect(() => {
+    console.log("useEffect executed!");
+    getRequestAction();
+
+  }, [reload]);
+
+  const updateDate = () => {
+    setReload(!reload);
+  }
+  // Details for person
   const PersonDetails = () => {
     return (
       <>
@@ -44,10 +65,7 @@ const CrudDemo = () => {
                   <span>Title : {person.title}</span>
                 </div>
               </div>
-              <button type='button' className='btn btn-danger' onClick={() => {
-                setPerson({});
-                setShowDetails(false);
-              }}>Hide</button>
+              <button type='button' className='btn btn-danger' onClick={updateDate}>Hide</button>
             </div>
 
           </div>
@@ -59,21 +77,16 @@ const CrudDemo = () => {
   // Table 
   const Table = () => {
     return (
-      <div className="test">
-        <table className="table table-striped">
-          <TableHeader />
-          <tbody>
 
-            {personList.map((person) => (
-              <TableRow
-                key={person.id}
-                person={person}
-               
-              />
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <table className="table table-striped">
+
+
+        <TableHeader />
+        <TableRow list={personList} />
+
+
+      </table>
+
     );
   }
 
@@ -99,50 +112,105 @@ const CrudDemo = () => {
 
   const TableRow = (props) => {
 
-    if (!props.list && props.list.length == 0) {
+    if (!props.list && props.list.length === 0) {
       return (
         <tbody>
           <tr>
             <td colSpan="5">Data not Found</td>
           </tr>
         </tbody>
-        );
+      );
     }
     return (
       <tbody>
-      {props.list.map((person) => {
-        const row = (
-          <tr key={person.id}>
-            <td>{person.id}</td>
-            <td>{person.firstName + " "} {person.lastName} </td>
-            <td>{person.email}</td>
-            <td>
-              <TableAction person={person} />
-            </td>
-          </tr>
-        );
-        return row;
-      })}
-    </tbody>
+        {props.list.map((person) => {
+          const row = (
+            <tr key={person.id}>
+              <td>{person.id}</td>
+              <td>{person.firstName + " "} {person.lastName} </td>
+              <td>{person.email}</td>
+              <td>
+                <TableAction person={person} />
+              </td>
+            </tr>
+          );
+          return row;
+        })}
+      </tbody>
     );
 
+  }
+ 
+  const getRequestAction = async () => {
+    await axios.get(API_URL).then(response => {
+      console.log("RESPONSE:", response);
+      if (response.status === 200) {
+        setPersonList(response.data);
+        setAlert({ type: 'success', message: 'GET operation is done!' })
+      } else {
+        setAlert({ type: 'warning', message: 'Display API Error Message...' });
+      }
+    }).catch(error => {
+      console.log("ERROR: ", error);
+      setAlert({ type: 'danger', message: error.message })
+    });
   }
 
   const TableAction = (props) => {
 
-    const handleDetailsClick = () => {
-      console.log("PERSON:", person);
-      setPerson(props.person);
-      setShowDetails(true);
+    const handleDetailsClick = async () => {
+      console.log("PERSON:", props.person.id);
+      
+      await axios.get(API_URL + '/' +  props.person.id).then(response =>{
+        if (response.status === 200) {
+          setPerson(response.data);
+          setShowDetails(true);
+          setAlert({ type: 'success', message: 'GET operation is done!' })
+        } else {
+          setAlert({ type: 'warning', message: 'Display API Error Message...' });
+        }
+      }).catch(error => {
+        console.log("ERROR: ", error);
+        setAlert({ type: 'danger', message: error.message })
+      });
+     
+    }
+    const handleDeleteClick =  async () => {
+      console.log("PERSON: Deleted ", props.person.id);
+      // Call the API ( for all buttons )
+      await axios.delete(API_URL+'/'+props.person.id).then(response => {
+        updateDate();
+        if(response.status === 204){
+          setAlert({type: 'success', message: 'Put operation is done!'});
+      } else {
+          setAlert({type: 'warning', message: 'Display API Error Message...'});
       }
-      const handleDeleteClick = () => {
-        console.log("PERSON: Deleted");
-      };
-    
-      const handleEditClick = () => {
-        console.log("PERSON: Edited ");
-      };
-    
+      }).catch( error => {
+        console.log("ERROR: ", error);
+        setAlert({type: 'danger', message: error.message});
+    });
+      
+
+    };
+
+    const handleEditClick = async ()  => {
+      console.log("PERSON: Edited ", props.person);
+      const data = {id: 1, firstName: 'Test', lastName:'testsson', email: 'test@test.se', title: 'TEST'}
+      // Call the API ( for all buttons 
+      await axios.put(API_URL, data).then(response =>{
+        console.log("RESPONSE:", response);
+        updateDate();
+        if(response.status === 204){
+          setAlert({type: 'success', message: 'Put operation is done!'});
+      } else {
+          setAlert({type: 'warning', message: 'Display API Error Message...'});
+      }
+      }).catch( error => {
+        console.log("ERROR: ", error);
+        setAlert({type: 'danger', message: error.message});
+    });
+    };
+
     return (
       <div>
         <button className='btn btn-primary' onClick={handleDetailsClick}>Details</button>
@@ -151,19 +219,22 @@ const CrudDemo = () => {
       </div>
     )
   }
-  
+
   // what is seen on the page
   return (
     <>
-      <div>
+    <div className='person-form'>
+
+    </div>
+      <div className='person-details-container'>
         <PersonDetails />
       </div>
 
       <div>
-        <table className='table table-striped'>
-          <TableHeader />
-          <TableRow list={personList} />
-        </table>
+        <Table />
+      </div>
+      <div className='col'>
+        <button type='button' className='btn btn-info' onClick={getRequestAction}>Get List of persons from API </button>
       </div>
     </>
   );
