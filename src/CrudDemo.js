@@ -343,9 +343,7 @@ const CrudDemo = () => {
       <div>
         {showTable && <Table />}
       </div>
-      {showButton && <div className='col'>
-        <button type='button' className='btn btn-info' onClick={getRequestAction}>Get List of persons from API </button>
-      </div>}
+     
       <div>
         {showEdit && <>
 
