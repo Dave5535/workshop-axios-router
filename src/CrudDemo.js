@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import AlertMessage from './AlertMessage';
-import {useForm} from 'react-hook-form';
+import { set, useForm } from 'react-hook-form';
 
 const CrudDemo = () => {
 
-  // initializ js variables 
+  // initializ js variables
   const persons = [];
 
-  // define state variables 
+  // define state variables
 
   const API_URL = 'http://localhost:8080/api/v1/person';
-  const [selectedId, setSelectedId] = useState(null);
-// Alert
+
+  // Alert
   const [alert, setAlert] = useState({ type: '', message: '' });
 
-// person
+  // person
+  
   const [personList, setPersonList] = useState(persons);
   const [showDetails, setShowDetails] = useState(false);
   const [person, setPerson] = useState({
@@ -26,21 +26,96 @@ const CrudDemo = () => {
     email: "",
     title: "",
   });
-// useForm
-  const {register, handleSubmit, formState: {errors}} = useForm();
-// useEfect
+
+  // useEfect
+
   const [reload, setReload] = useState(false);
+  // useForm
 
-// useForm
+  const { register, handleSubmit, formState: { errors } } = useForm();
+  // hide when editing
 
-  //useEfect 
+  const [showForm, setShowForm] = useState(true);
+  const [showTable, setShowTable] = useState(true);
+  const [showEdit, setShowEdit] = useState(false);
+  const [showButton, setShowButton] = useState(true);
+  // useForm
+
+  const Form = () => {
+    return (
+      <>
+        <br />
+        <form onSubmit={handleSubmit(saveData)}>
+          <div className='row'>
+            <div className='col'>
+              <input type='text' className='form-control' id='firstName' {...register("firstName", { required: true })} placeholder='Enter firstName...' />
+              {errors.firstName && errors.firstName.type === "required" && (<span className='text-danger'>firstName is Required!</span>)}
+            </div>
+            <div className='col'>
+              <input type='text' className='form-control' id='lastName' {...register("lastName", { required: true })} placeholder='Enter lastName...' />
+              {errors.lastName && errors.lastName.type === "required" && (<span className='text-danger'>lastName is Required!</span>)}
+            </div>
+          </div>
+
+          <br />
+
+          <div className='row'>
+            <div className='col'>
+              <input type='text' className='form-control' id='email' {...register("email", { required: true })} placeholder='Enter email...' />
+              {errors.email && errors.email.type === "required" && (<span className='text-danger'>email is Required!</span>)}
+              <br />
+              <input type='text' className='form-control ' id='title' {...register("title", { required: true })} placeholder='Enter title...' />
+
+            </div>
+          </div>
+          <br />
+          <div className='col'>
+            <button type='submit' className='btn btn-success' >Add</button>
+            <button type='button' className='btn btn-danger' onClick={() => {
+              console.log('RESET:');
+              document.getElementById('firstName').value = '';
+              document.getElementById('lastName').value = '';
+              document.getElementById('email').value = '';
+              document.getElementById('title').value = '';
+
+            }} >Reset</button>
+          </div>
+
+        </form>
+      </>
+    )
+  };
+
+  // Save Form Data for adding
+  const saveData = async (data) => {
+    const firstName = data.firstName;
+    const lastName = data.lastName;
+    const email = data.email;
+    const title = data.title;
+
+    const newPerson = { firstName, lastName, email, title }
+
+    await axios.post(API_URL, newPerson).then(response => {
+      if (response.status === 201) {
+        updateList();
+        setAlert({ type: 'success', message: 'Post operation is done!' });
+      } else {
+        setAlert({ type: 'warning', message: 'Display API Error Message...' });
+      }
+
+    }).catch(error => {
+      console.log("ERROR: ", error);
+      setAlert({ type: 'danger', message: error.message });
+    });
+  };
+
+  //useEfect
   useEffect(() => {
-    console.log("useEffect executed!");
     getRequestAction();
-
+    setShowDetails(false)
   }, [reload]);
 
-  const updateDate = () => {
+  const updateList = () => {
     setReload(!reload);
   }
   // Details for person
@@ -65,7 +140,7 @@ const CrudDemo = () => {
                   <span>Title : {person.title}</span>
                 </div>
               </div>
-              <button type='button' className='btn btn-danger' onClick={updateDate}>Hide</button>
+              <button type='button' className='btn btn-danger' onClick={updateList}>Hide</button>
             </div>
 
           </div>
@@ -74,7 +149,7 @@ const CrudDemo = () => {
     );
   }
 
-  // Table 
+  // Table
   const Table = () => {
     return (
 
@@ -140,10 +215,109 @@ const CrudDemo = () => {
     );
 
   }
- 
+
+
+  const TableAction = (props) => {
+
+    const handleDetailsClick = async () => {
+      console.log("PERSON:", props.person.id);
+
+      await axios.get(API_URL + '/' + props.person.id).then(response => {
+        if (response.status === 200) {
+          setPerson(response.data);
+          setShowDetails(true);
+          setAlert({ type: 'success', message: 'GET operation is done!' })
+        } else {
+          setAlert({ type: 'warning', message: 'Display API Error Message...' });
+        }
+      }).catch(error => {
+        console.log("ERROR: ", error);
+        setAlert({ type: 'danger', message: error.message })
+      });
+
+    }
+    const handleDeleteClick = async () => {
+      console.log("PERSON: Deleted ", props.person.id);
+      // Call the API ( for all buttons )
+      await axios.delete(API_URL + '/' + props.person.id).then(response => {
+        updateList();
+        if (response.status === 204) {
+          setAlert({ type: 'success', message: 'Put operation is done!' });
+        } else {
+          setAlert({ type: 'warning', message: 'Display API Error Message...' });
+        }
+      }).catch(error => {
+        console.log("ERROR: ", error);
+        setAlert({ type: 'danger', message: error.message });
+      });
+
+
+    };
+    const enableEdit = () => {
+      setShowForm(false);
+      setShowTable(false);
+      setShowButton(false);
+      setShowEdit(true);
+    }
+    const handleEditClick = async () => {
+      enableEdit();
+    };
+
+    return (
+      <div>
+        <button className='btn btn-primary' onClick={handleDetailsClick}>Details</button>
+        <button className='btn btn-danger' onClick={handleDeleteClick}>Delete</button>
+        <button className='btn btn-warning' onClick={handleEditClick}>Edit</button>
+      </div>
+    )
+  }
+  const upDate = async (data) => {
+
+    console.log(data.id);
+    const id = data.id;
+    const firstName = data.firstName;
+    const lastName = data.lastName;
+    const email = data.email;
+    const title = data.title;
+
+    const updatedPerson = { id, firstName, lastName, email, title }
+    console.log(updatedPerson);
+    // Call the API ( for all buttons
+    await axios.put(API_URL, updatedPerson).then(response => {
+      updateList();
+
+      if (response.status === 204) {
+        setAlert({ type: 'success', message: 'Put operation is done!' });
+      } else {
+        setAlert({ type: 'warning', message: 'Display API Error Message...' });
+      }
+    }).catch(error => {
+      console.log("ERROR: ", error);
+      setAlert({ type: 'danger', message: error.message });
+    });
+
+    goBack();
+  }
+  const goBack = () => {
+    console.log('GOBACK');
+    
+    setShowForm(true);
+    setShowTable(true);
+    setShowButton(true);
+    
+   setShowEdit(false);
+  }
+  const empty = () => {
+    console.log('EMPTY');
+    document.getElementById('editfirstName').value = '';
+    document.getElementById('editlastName').value = '';
+    document.getElementById('editemail').value = '';
+    document.getElementById('edittitle').value = '';
+   
+  }
+  // to update / get the new list
   const getRequestAction = async () => {
     await axios.get(API_URL).then(response => {
-      console.log("RESPONSE:", response);
       if (response.status === 200) {
         setPersonList(response.data);
         setAlert({ type: 'success', message: 'GET operation is done!' })
@@ -156,85 +330,67 @@ const CrudDemo = () => {
     });
   }
 
-  const TableAction = (props) => {
-
-    const handleDetailsClick = async () => {
-      console.log("PERSON:", props.person.id);
-      
-      await axios.get(API_URL + '/' +  props.person.id).then(response =>{
-        if (response.status === 200) {
-          setPerson(response.data);
-          setShowDetails(true);
-          setAlert({ type: 'success', message: 'GET operation is done!' })
-        } else {
-          setAlert({ type: 'warning', message: 'Display API Error Message...' });
-        }
-      }).catch(error => {
-        console.log("ERROR: ", error);
-        setAlert({ type: 'danger', message: error.message })
-      });
-     
-    }
-    const handleDeleteClick =  async () => {
-      console.log("PERSON: Deleted ", props.person.id);
-      // Call the API ( for all buttons )
-      await axios.delete(API_URL+'/'+props.person.id).then(response => {
-        updateDate();
-        if(response.status === 204){
-          setAlert({type: 'success', message: 'Put operation is done!'});
-      } else {
-          setAlert({type: 'warning', message: 'Display API Error Message...'});
-      }
-      }).catch( error => {
-        console.log("ERROR: ", error);
-        setAlert({type: 'danger', message: error.message});
-    });
-      
-
-    };
-
-    const handleEditClick = async ()  => {
-      console.log("PERSON: Edited ", props.person);
-      const data = {id: 1, firstName: 'Test', lastName:'testsson', email: 'test@test.se', title: 'TEST'}
-      // Call the API ( for all buttons 
-      await axios.put(API_URL, data).then(response =>{
-        console.log("RESPONSE:", response);
-        updateDate();
-        if(response.status === 204){
-          setAlert({type: 'success', message: 'Put operation is done!'});
-      } else {
-          setAlert({type: 'warning', message: 'Display API Error Message...'});
-      }
-      }).catch( error => {
-        console.log("ERROR: ", error);
-        setAlert({type: 'danger', message: error.message});
-    });
-    };
-
-    return (
-      <div>
-        <button className='btn btn-primary' onClick={handleDetailsClick}>Details</button>
-        <button className='btn btn-danger' onClick={handleDeleteClick}>Delete</button>
-        <button className='btn btn-warning' onClick={handleEditClick}>Edit</button>
-      </div>
-    )
-  }
-
   // what is seen on the page
   return (
     <>
-    <div className='person-form'>
-
-    </div>
+      <div className='person-form'>
+        {showForm && <Form />}
+      </div>
       <div className='person-details-container'>
         <PersonDetails />
       </div>
 
       <div>
-        <Table />
+        {showTable && <Table />}
       </div>
-      <div className='col'>
+      {showButton && <div className='col'>
         <button type='button' className='btn btn-info' onClick={getRequestAction}>Get List of persons from API </button>
+      </div>}
+      <div>
+        {showEdit && <>
+
+          <form onSubmit={handleSubmit(upDate)}>
+
+            <div className='row'>
+              <div className='col-2'>
+                <input type={'number'} className='form-control' id='id' {...register("id", { required: true })} placeholder='Enter id...' />
+                {errors.id && errors.id.type === "required" && (<span className='text-danger'>id is Required!</span>)}
+              </div>
+            </div>
+
+            <div className='row'>
+              <div className='col'>
+                <input type='text' className='form-control' id='editfirstName' {...register("firstName", { required: true })} placeholder='Enter firstName...' />
+                {errors.firstName && errors.firstName.type === "required" && (<span className='text-danger'>firstName is Required!</span>)}
+              </div>
+              <div className='col'>
+                <input type='text' className='form-control' id='editlastName' {...register("lastName", { required: true })} placeholder='Enter lastName...' />
+                {errors.lastName && errors.lastName.type === "required" && (<span className='text-danger'>lastName is Required!</span>)}
+              </div>
+            </div>
+
+            <br />
+
+            <div className='row'>
+              <div className='col'>
+                <input type='text' className='form-control' id='editemail' {...register("email", { required: true })} placeholder='Enter email...' />
+                {errors.email && errors.email.type === "required" && (<span className='text-danger'>email is Required!</span>)}
+                <br />
+                <input type='text' className='form-control ' id='edittitle' {...register("title", { required: true })} placeholder='Enter title...' />
+
+              </div>
+            </div>
+            <br />
+            <div className='col'>
+              <button type='submit' className='btn btn-success' >Add</button>
+              <button type='button' className='btn btn-danger' onClick={empty} >Reset</button>
+              <button type='button ' className='btn btn-danger' onClick={ goBack } >return</button>
+            </div>
+
+          </form>
+
+        </>
+        }
       </div>
     </>
   );
