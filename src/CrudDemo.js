@@ -38,14 +38,13 @@ const CrudDemo = () => {
   const [showForm, setShowForm] = useState(true);
   const [showTable, setShowTable] = useState(true);
   const [showEdit, setShowEdit] = useState(false);
-  const [showButton, setShowButton] = useState(true);
   // useForm
 
   const Form = () => {
     return (
       <>
         <br />
-        <form onSubmit={handleSubmit(saveData)}>
+        <form className='rounded-4 border p-2 m-2' onSubmit={handleSubmit(saveData)}>
           <div className='row'>
             <div className='col'>firstName
               <input type='text' className='form-control' id='firstName' {...register("firstName", { required: true })} placeholder='Enter firstName...' />
@@ -71,15 +70,14 @@ const CrudDemo = () => {
           </div>
           <br />
           <div className='col'>
-            <button type='submit' className='btn btn-success' >Add</button>
-            <button type='button' className='btn btn-danger' onClick={() => {
-              console.log('RESET:');
-              document.getElementById('firstName').value = '';
-              document.getElementById('lastName').value = '';
-              document.getElementById('email').value = '';
-              document.getElementById('title').value = '';
-
-            }} >Reset</button>
+            <button type='submit' className='btn btn-success m-2' >Add</button>
+            <button type='button' className='btn btn-danger m-2' onClick={() => {
+    console.log('RESET:');
+    document.getElementById('firstName').value = '';
+    document.getElementById('lastName').value = '';
+    document.getElementById('email').value = '';
+    document.getElementById('title').value = '';
+   }} >Reset</button>
           </div>
 
         </form>
@@ -153,16 +151,10 @@ const CrudDemo = () => {
   // Table
   const Table = () => {
     return (
-
       <table className="table table-striped">
-
-
         <TableHeader />
         <TableRow list={personList} />
-
-
       </table>
-
     );
   }
 
@@ -170,7 +162,7 @@ const CrudDemo = () => {
     return (
       <thead>
         <tr>
-          <th colSpan="4" className="table-dark">
+          <th colSpan="4" className="table-dark rounded-top">
             <div className="d-flex justify-content-between align-items-center">
               <div>Person List</div>
             </div>
@@ -257,8 +249,9 @@ const CrudDemo = () => {
     const enableEdit = () => {
       setShowForm(false);
       setShowTable(false);
-      setShowButton(false);
+      
       setShowEdit(true);
+      
     }
     const handleEditClick = async () => {
       enableEdit();
@@ -267,9 +260,9 @@ const CrudDemo = () => {
 
     return (
       <div>
-        <button className='btn btn-primary' onClick={handleDetailsClick}>Details</button>
-        <button className='btn btn-danger' onClick={handleDeleteClick}>Delete</button>
-        <button className='btn btn-warning' onClick={handleEditClick}>Edit</button>
+        <button className='btn btn-primary m-2' onClick={handleDetailsClick}>Details</button>
+        <button className='btn btn-danger m-2' onClick={handleDeleteClick}>Delete</button>
+        <button className='btn btn-warning m-2' onClick={handleEditClick}>Edit</button>
       </div>
     )
   }
@@ -305,7 +298,6 @@ const CrudDemo = () => {
     console.log('GOBACK');
     setShowForm(true);
     setShowTable(true);
-    setShowButton(true)
    setShowEdit(false);
   }
   const empty = () => {
@@ -348,7 +340,7 @@ const CrudDemo = () => {
       <div>
         {showEdit && <>
 
-          <form onSubmit={handleSubmit(upDate)}>
+          <form className='rounded-4 border p-2 m-2' onSubmit={handleSubmit(upDate)}>
 
             <div className='row'>
               <div className='col-2'> id
@@ -383,9 +375,9 @@ const CrudDemo = () => {
             </div>
             <br />
             <div className='col'>
-              <button type='submit' className='btn btn-success' >Add</button>
-              <button type='button' className='btn btn-danger' onClick={empty} >Reset</button>
-              <button type='button ' className='btn btn-danger' onClick={ goBack } >return</button>
+              <button type='submit' className='btn btn-success m-2' >Add</button>
+              <button type='button' className='btn btn-danger m-2' onClick={empty} >Reset</button>
+              <button type='button ' className='btn btn-danger m-2' onClick={ goBack } >return</button>
             </div>
 
           </form>
