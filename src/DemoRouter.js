@@ -32,7 +32,7 @@ const Header = () => {
 <div className="container-fluid">
 <ul className="nav me-auto">
   <li className="nav-item">
-    <Link className="navbar-brand text-white" to="/">React</Link>
+    <Link className="navbar-brand text-white d-flex justify-content-center" to="/">React</Link>
   </li>
   <li className="nav-item">
     <Link className="nav-link text-white" to="/home">Home</Link>
