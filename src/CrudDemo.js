@@ -16,7 +16,7 @@ const CrudDemo = () => {
   const [alert, setAlert] = useState({ type: '', message: '' });
 
   // person
-  
+
   const [personList, setPersonList] = useState(persons);
   const [showDetails, setShowDetails] = useState(false);
   const [person, setPerson] = useState({
@@ -34,7 +34,7 @@ const CrudDemo = () => {
 
   const { register, handleSubmit, formState: { errors } } = useForm();
   // hide when editing
-
+  const [personId, setPersonId] = useState(null);
   const [showForm, setShowForm] = useState(true);
   const [showTable, setShowTable] = useState(true);
   const [showEdit, setShowEdit] = useState(false);
@@ -47,11 +47,11 @@ const CrudDemo = () => {
         <br />
         <form onSubmit={handleSubmit(saveData)}>
           <div className='row'>
-            <div className='col'>
+            <div className='col'>firstName
               <input type='text' className='form-control' id='firstName' {...register("firstName", { required: true })} placeholder='Enter firstName...' />
               {errors.firstName && errors.firstName.type === "required" && (<span className='text-danger'>firstName is Required!</span>)}
             </div>
-            <div className='col'>
+            <div className='col'>lastName
               <input type='text' className='form-control' id='lastName' {...register("lastName", { required: true })} placeholder='Enter lastName...' />
               {errors.lastName && errors.lastName.type === "required" && (<span className='text-danger'>lastName is Required!</span>)}
             </div>
@@ -60,10 +60,11 @@ const CrudDemo = () => {
           <br />
 
           <div className='row'>
-            <div className='col'>
+            <div className='col'>email
               <input type='text' className='form-control' id='email' {...register("email", { required: true })} placeholder='Enter email...' />
               {errors.email && errors.email.type === "required" && (<span className='text-danger'>email is Required!</span>)}
               <br />
+              title
               <input type='text' className='form-control ' id='title' {...register("title", { required: true })} placeholder='Enter title...' />
 
             </div>
@@ -261,6 +262,7 @@ const CrudDemo = () => {
     }
     const handleEditClick = async () => {
       enableEdit();
+      setPersonId(props.person.id);
     };
 
     return (
@@ -273,8 +275,9 @@ const CrudDemo = () => {
   }
   const upDate = async (data) => {
 
-    console.log(data.id);
-    const id = data.id;
+    
+    const id = personId;
+    console.log(id);
     const firstName = data.firstName;
     const lastName = data.lastName;
     const email = data.email;
@@ -295,16 +298,14 @@ const CrudDemo = () => {
       console.log("ERROR: ", error);
       setAlert({ type: 'danger', message: error.message });
     });
-
+  setPersonId(null);
     goBack();
   }
   const goBack = () => {
     console.log('GOBACK');
-    
     setShowForm(true);
     setShowTable(true);
-    setShowButton(true);
-    
+    setShowButton(true)
    setShowEdit(false);
   }
   const empty = () => {
@@ -350,18 +351,19 @@ const CrudDemo = () => {
           <form onSubmit={handleSubmit(upDate)}>
 
             <div className='row'>
-              <div className='col-2'>
-                <input type={'number'} className='form-control' id='id' {...register("id", { required: true })} placeholder='Enter id...' />
-                {errors.id && errors.id.type === "required" && (<span className='text-danger'>id is Required!</span>)}
+              <div className='col-2'> id
+                <input type={'number'} className='form-control' placeholder={personId}readOnly />
+                
               </div>
             </div>
 
             <div className='row'>
-              <div className='col'>
+              <div className='col'> firstName
                 <input type='text' className='form-control' id='editfirstName' {...register("firstName", { required: true })} placeholder='Enter firstName...' />
                 {errors.firstName && errors.firstName.type === "required" && (<span className='text-danger'>firstName is Required!</span>)}
               </div>
-              <div className='col'>
+              
+              <div className='col'>lastName
                 <input type='text' className='form-control' id='editlastName' {...register("lastName", { required: true })} placeholder='Enter lastName...' />
                 {errors.lastName && errors.lastName.type === "required" && (<span className='text-danger'>lastName is Required!</span>)}
               </div>
@@ -370,10 +372,11 @@ const CrudDemo = () => {
             <br />
 
             <div className='row'>
-              <div className='col'>
+              <div className='col'> email
                 <input type='text' className='form-control' id='editemail' {...register("email", { required: true })} placeholder='Enter email...' />
                 {errors.email && errors.email.type === "required" && (<span className='text-danger'>email is Required!</span>)}
                 <br />
+                title
                 <input type='text' className='form-control ' id='edittitle' {...register("title", { required: true })} placeholder='Enter title...' />
 
               </div>
