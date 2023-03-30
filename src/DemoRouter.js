@@ -47,8 +47,9 @@ const Header = () => {
     <Link className="nav-link text-white" to="/crud">CRUD</Link>
   </li>
 </ul>
+     <button type='button' className='btn btn-primary '>Sign Up</button>
       </div>
-      <button type='button' className='btn btn-primary '>Sign Up</button>
+      
       
 </nav>
     );
